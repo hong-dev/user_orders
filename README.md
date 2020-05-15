@@ -5,6 +5,8 @@
 
 # DB Modeling
 
+![DB Modeling](https://user-images.githubusercontent.com/53142539/82078952-fc89f700-971c-11ea-9089-00cfb25d55c9.png)
+
 <br>
 
 # Technologies
