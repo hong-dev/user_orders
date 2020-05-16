@@ -3,18 +3,18 @@
 
 <br>
 
-# DB Modeling
-
-![DB Modeling](https://user-images.githubusercontent.com/53142539/82083118-22ff6080-9724-11ea-9621-9967df6af4d0.png)
-
-<br>
-
 # Technologies
 * Python 3.8
 * Django
 * MySQL
 * CORS headers
 * Docker
+
+<br>
+
+# DB Modeling
+
+![DB Modeling](https://user-images.githubusercontent.com/53142539/82083118-22ff6080-9724-11ea-9621-9967df6af4d0.png)
 
 <br>
 
