@@ -4,6 +4,7 @@ import jwt
 
 from project.settings import SECRET_KEY, ALGORITHM
 from .models          import Gender, User
+from .utils           import login_required
 
 from django.views import View
 from django.http  import HttpResponse, JsonResponse
@@ -63,3 +64,18 @@ class SignInView(View):
 
         except KeyError:
             return JsonResponse({"error" : "INVALID_KEYS"}, status = 400)
+
+class UserInfoView(View):
+    @login_required
+    def get(self, request):
+        user = request.user
+
+        user_info = {
+            "name"         : user.name,
+            "nickname"     : user.nickname,
+            "phone_number" : user.phone_number,
+            "email"        : user.email,
+            "gender"       : user.gender.gender
+        }
+
+        return JsonResponse({"user_info" : user_info}, status = 200)
