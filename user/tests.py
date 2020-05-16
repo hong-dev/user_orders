@@ -295,10 +295,57 @@ class UserInfoTest(TestCase):
                 "user_info" : {
                     "name"         : "홍",
                     "nickname"     : "Dev",
-                    "phone_number" : 1012345678,
+                    "phone_number" : "01012345678",
                     "email"        : "hong@gamil.com",
                     "gender"       : "Woman"
                 }
             }
         )
         self.assertEqual(response.status_code, 200)
+
+    def test_user_info_get_token_fail(self):
+        token = jwt.encode(
+            {"email" : "hong@gamil.com"},
+            "WRONG_SECRET_KEY",
+            algorithm = ALGORITHM
+        ).decode('utf-8')
+
+        response = Client().get('/user/info',
+                                **{'HTTP_Authorization' : token},
+                                content_type = 'application/json')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "INVALID_TOKEN"
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_user_info_get_user_fail(self):
+        token = jwt.encode(
+            {"email" : "dev@gamil.com"},
+            SECRET_KEY,
+            algorithm = ALGORITHM
+        ).decode('utf-8')
+
+        response = Client().get('/user/info',
+                                **{'HTTP_Authorization' : token},
+                                content_type = 'application/json')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "INVALID_USER"
+            }
+        )
+        self.assertEqual(response.status_code, 401)
+
+    def test_user_info_get_login_fail(self):
+        response = Client().get('/user/info',
+                                content_type = 'application/json')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "LOGIN_REQUIRED"
+            }
+        )
+        self.assertEqual(response.status_code, 401)
