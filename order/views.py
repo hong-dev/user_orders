@@ -3,6 +3,7 @@ import string
 import random
 
 from .models    import Order
+from user.models import User
 from user.utils import login_required
 
 from django.views import View
@@ -53,3 +54,44 @@ class OrderDetailView(View):
             } for order in order_list ]
 
         return JsonResponse({"orders" : orders}, status = 200)
+
+class OrderListView(View):
+    def get(self, request):
+        limit  = int(request.GET.get('limit', 10))
+        offset = int(request.GET.get('page', 0)) * limit
+        name   = request.GET.get('name')
+        email  = request.GET.get('email')
+
+        order_list = (
+            Order
+            .objects
+            .select_related('user')
+        )
+
+        if name:
+            users = User.objects.filter(name__icontains = name)
+        elif email:
+            users = User.objects.filter(email__icontains = email)
+        else:
+            users = User.objects.all()
+
+        orders = [
+            {
+                "id"           : order.id,
+                "user_id"      : order.user.id,
+                "user_name"    : order.user.name,
+                "user_email"   : order.user.email,
+                "order_number" : order.order_number,
+                "product"      : order.product,
+                "payment_date" : order.payment_date
+            }
+            for user in users if
+            (order := order_list.filter(user = user.id).latest('payment_date'))
+        ]
+
+        if len(orders):
+            orders = orders[offset : offset + limit]
+
+            return JsonResponse({"orders" : orders}, status = 200)
+
+        return JsonResponse({"error" : "ORDER_DOES_NOT_EXIST"}, status = 400)
