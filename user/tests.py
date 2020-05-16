@@ -14,8 +14,15 @@ class SignUpTest(TestCase):
             gender = "Woman"
         )
 
-    def tearDown(self):
-        Gender.objects.all().delete()
+        User.objects.create(
+            id           = 1,
+            name         = "홍홍",
+            nickname     = "DevDev",
+            password     = "1234",
+            phone_number = "01012345678",
+            email        = "honghong@gamil.com",
+            gender       = Gender.objects.get(id = 1)
+        )
 
     def test_sign_up_post_success(self):
         user_data = {
@@ -30,7 +37,7 @@ class SignUpTest(TestCase):
                                  json.dumps(user_data),
                                  content_type = 'application/json')
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
 
     def test_sign_up_post_without_gender_success(self):
         user_data = {
@@ -44,7 +51,27 @@ class SignUpTest(TestCase):
                                  json.dumps(user_data),
                                  content_type = 'application/json')
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
+
+    def test_sign_up_email_duplicate_fail(self):
+        user_data = {
+            "name"         : "홍",
+            "nickname"     : "Dev",
+            "password"     : "1234",
+            "phone_number" : "01012345678",
+            "email"        : "honghong@gamil.com",
+            "gender"       : "Woman"
+        }
+        response = Client().post('/user/sign-up',
+                                 json.dumps(user_data),
+                                 content_type = 'application/json')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "EMAIL_ALREADY_EXISTS"
+            }
+        )
+        self.assertEqual(response.status_code, 409)
 
     def test_sign_up_name_key_fail(self):
         user_data = {
@@ -195,7 +222,7 @@ class SignInTest(TestCase):
                 "token" : "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImhvbmdAZ2FtaWwuY29tIn0.oWZ_v9icA4Ur_9Gs64ASOJ1rMaW_LCvU6tyG729f1m0"
             }
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
 
     def test_sign_in_post_password_fail(self):
         user_data = {
