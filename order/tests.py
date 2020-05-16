@@ -154,3 +154,156 @@ class OrderDetailTest(TestCase):
             }
         )
         self.assertEqual(response.status_code, 200)
+
+class OrderListTest(TestCase):
+    def setUp(self):
+        Gender.objects.create(
+            id     = 1,
+            gender = "Woman"
+        )
+
+        User.objects.create(
+            id           = 1,
+            name         = "홍1",
+            nickname     = "Dev1",
+            password     = "1234",
+            phone_number = "01012345678",
+            email        = "hong1@gamil.com",
+            gender       = Gender.objects.get(id = 1)
+        )
+
+        User.objects.create(
+            id           = 2,
+            name         = "홍2",
+            nickname     = "Dev2",
+            password     = "1234",
+            phone_number = "01012345678",
+            email        = "hong2@gamil.com",
+            gender       = Gender.objects.get(id = 1)
+        )
+
+        Order.objects.create(
+            id           = 1,
+            user         = User.objects.get(id = 1),
+            order_number = "8UVNSN0Z9IG4",
+            product      = "옛날 비누",
+            payment_date = "2019-03-01T00:24:00"
+        )
+
+        Order.objects.create(
+            id           = 2,
+            user         = User.objects.get(id = 1),
+            order_number = "MDT30FXBKY5J",
+            product      = "최근 비누",
+            payment_date = "2020-05-01"
+        )
+
+        Order.objects.create(
+            id           = 3,
+            user         = User.objects.get(id = 2),
+            order_number = "T4LV8J9BUE3U",
+            product      = "최근 책갈피",
+            payment_date = "2018-03-01T00:24:00"
+        )
+
+        Order.objects.create(
+            id           = 4,
+            user         = User.objects.get(id = 2),
+            order_number = "QX2JQWYL5GVU",
+            product      = "옛날 책갈피",
+            payment_date = "2017-05-01"
+        )
+
+    def tearDown(self):
+        Gender.objects.all().delete()
+        User.objects.all().delete()
+        Order.objects.all().delete()
+
+    def test_order_list_get_success(self):
+        response = Client().get('/order/list')
+
+        self.assertEqual(response.json(),
+            {
+                "orders": [
+                    {
+                        "id": 2,
+                        "user_id": 1,
+                        "user_name": "홍1",
+                        "user_email": "hong1@gamil.com",
+                        "order_number": "MDT30FXBKY5J",
+                        "product": "최근 비누",
+                        "payment_date": "2020-05-01T00:00:00"
+                    },
+                    {
+                        "id": 3,
+                        "user_id": 2,
+                        "user_name": "홍2",
+                        "user_email": "hong2@gamil.com",
+                        "order_number": "T4LV8J9BUE3U",
+                        "product": "최근 책갈피",
+                        "payment_date": "2018-03-01T00:24:00"
+                    }
+                ]
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_order_list_get_search_name_success(self):
+        response = Client().get('/order/list?name=홍1')
+
+        self.assertEqual(response.json(),
+            {
+                "orders": [
+                    {
+                        "id": 2,
+                        "user_id": 1,
+                        "user_name": "홍1",
+                        "user_email": "hong1@gamil.com",
+                        "order_number": "MDT30FXBKY5J",
+                        "product": "최근 비누",
+                        "payment_date": "2020-05-01T00:00:00"
+                    }
+                ]
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_order_list_get_search_email_success(self):
+        response = Client().get('/order/list?email=hong1')
+
+        self.assertEqual(response.json(),
+            {
+                "orders": [
+                    {
+                        "id": 2,
+                        "user_id": 1,
+                        "user_name": "홍1",
+                        "user_email": "hong1@gamil.com",
+                        "order_number": "MDT30FXBKY5J",
+                        "product": "최근 비누",
+                        "payment_date": "2020-05-01T00:00:00"
+                    }
+                ]
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_order_list_get_search_name_fail(self):
+        response = Client().get('/order/list?name=김')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "ORDER_DOES_NOT_EXIST"
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_order_list_get_search_email_fail(self):
+        response = Client().get('/order/list?email=kim1')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "ORDER_DOES_NOT_EXIST"
+            }
+        )
+        self.assertEqual(response.status_code, 400)
