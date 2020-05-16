@@ -31,3 +31,25 @@ class OrderView(View):
 
         except KeyError:
             return JsonResponse({"error" : "INVALID_KEYS"}, status = 400)
+
+class OrderDetailView(View):
+    def get(self, request):
+        user_id = request.GET.get('user')
+
+        order_list = (
+            Order
+            .objects
+            .select_related('user')
+            .filter(user = user_id)
+            .order_by('-payment_date')
+        )
+
+        orders = [
+            {
+                "id"           : order.id,
+                "order_number" : order.order_number,
+                "product"      : order.product,
+                "payment_date" : order.payment_date
+            } for order in order_list ]
+
+        return JsonResponse({"orders" : orders}, status = 200)
