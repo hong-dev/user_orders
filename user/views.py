@@ -8,6 +8,7 @@ from .utils           import login_required
 
 from django.views import View
 from django.http  import HttpResponse, JsonResponse
+from django.db    import IntegrityError
 
 class SignUpView(View):
     def post(self, request):
@@ -16,9 +17,6 @@ class SignUpView(View):
         gender = user_data.get('gender')
 
         try:
-            if User.objects.filter(email = user_data['email']).exists():
-                return JsonResponse({"error" : "EMAIL_ALREADY_EXISTS"}, status = 400)
-
             User.objects.create(
                 name         = user_data['name'],
                 nickname     = user_data['nickname'],
@@ -31,13 +29,16 @@ class SignUpView(View):
                 gender       = Gender.objects.get(gender = gender) if gender else None
             )
 
-            return HttpResponse(status = 200)
+            return HttpResponse(status = 201)
 
-        except KeyError:
-            return JsonResponse({"error" : "INVALID_KEYS"}, status = 400)
+        except IntegrityError:
+            return JsonResponse({"error" : "EMAIL_ALREADY_EXISTS"}, status = 409)
 
         except Gender.DoesNotExist:
             return JsonResponse({"error" : "GENDER_DOES_NOT_EXIST"}, status = 400)
+
+        except KeyError:
+            return JsonResponse({"error" : "INVALID_KEYS"}, status = 400)
 
 class SignInView(View):
     def post(self, request):
@@ -56,7 +57,7 @@ class SignInView(View):
                                        algorithm = ALGORITHM
                                       ).decode('utf-8')
 
-                    return JsonResponse({"token" : token}, status = 200)
+                    return JsonResponse({"token" : token}, status = 201)
 
                 return JsonResponse({"error" : "WRONG_PASSWORD"}, status = 401)
 
