@@ -79,11 +79,12 @@ class UserInfoView(View):
         user = request.user
 
         user_info = {
+            "id"           : user.id,
             "name"         : user.name,
             "nickname"     : user.nickname,
             "phone_number" : user.phone_number,
             "email"        : user.email,
-            "gender"       : user.gender.gender
+            "gender"       : user.gender.gender if user.gender else None
         }
 
         return JsonResponse({"user_info" : user_info}, status = 200)

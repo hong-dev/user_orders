@@ -327,12 +327,23 @@ class UserInfoTest(TestCase):
         )
 
         User.objects.create(
-            name         = "홍",
-            nickname     = "Dev",
+            id           = 1,
+            name         = "홍1",
+            nickname     = "Dev1",
             password     = bcrypt.hashpw("1234".encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
             phone_number = "01012345678",
-            email        = "hong@gamil.com",
+            email        = "hong1@gamil.com",
             gender       = Gender.objects.get(id = 1)
+        )
+
+        User.objects.create(
+            id           = 2,
+            name         = "홍2",
+            nickname     = "Dev2",
+            password     = bcrypt.hashpw("1234".encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
+            phone_number = "01012345678",
+            email        = "hong2@gamil.com",
+            gender       = None
         )
 
     def tearDown(self):
@@ -341,7 +352,7 @@ class UserInfoTest(TestCase):
 
     def test_user_info_get_success(self):
         token = jwt.encode(
-            {"email" : "hong@gamil.com"},
+            {"email" : "hong1@gamil.com"},
             SECRET_KEY,
             algorithm = ALGORITHM
         ).decode('utf-8')
@@ -353,11 +364,37 @@ class UserInfoTest(TestCase):
         self.assertEqual(response.json(),
             {
                 "user_info" : {
-                    "name"         : "홍",
-                    "nickname"     : "Dev",
+                    "id"           : 1,
+                    "name"         : "홍1",
+                    "nickname"     : "Dev1",
                     "phone_number" : "01012345678",
-                    "email"        : "hong@gamil.com",
+                    "email"        : "hong1@gamil.com",
                     "gender"       : "Woman"
+                }
+            }
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_user_info_get_gender_null_success(self):
+        token = jwt.encode(
+            {"email" : "hong2@gamil.com"},
+            SECRET_KEY,
+            algorithm = ALGORITHM
+        ).decode('utf-8')
+
+        response = Client().get('/user/info',
+                                **{'HTTP_Authorization' : token},
+                                content_type = 'application/json')
+
+        self.assertEqual(response.json(),
+            {
+                "user_info" : {
+                    "id"           : 2,
+                    "name"         : "홍2",
+                    "nickname"     : "Dev2",
+                    "phone_number" : "01012345678",
+                    "email"        : "hong2@gamil.com",
+                    "gender"       : None
                 }
             }
         )
