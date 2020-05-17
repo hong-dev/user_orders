@@ -66,6 +66,13 @@ class SignInView(View):
         except KeyError:
             return JsonResponse({"error" : "INVALID_KEYS"}, status = 400)
 
+class LogOutView(View):
+    @login_required
+    def get(self, request):
+        request.session.flush()
+
+        return HttpResponse(status = 200)
+
 class UserInfoView(View):
     @login_required
     def get(self, request):
