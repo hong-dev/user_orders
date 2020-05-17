@@ -1,5 +1,5 @@
 # Introduction
-회원정보와 주문정보를 활용하여 DB modeling 및 API 작성
+회원정보와 주문정보를 활용하여 DB modeling, API 구현, Unit test 코드 작성
 
 <br>
 
