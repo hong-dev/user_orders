@@ -1,9 +1,12 @@
 import jwt
+import re
 
 from .models          import User
 from project.settings import SECRET_KEY, ALGORITHM
 
-from django.http import JsonResponse
+from django.http            import JsonResponse
+from django.core.validators import validate_email, validate_integer
+from django.core.exceptions import ValidationError
 
 def login_required(function):
     def wrapper(self, request, *args, **kwargs):
@@ -26,3 +29,31 @@ def login_required(function):
         return JsonResponse({"error" : "LOGIN_REQUIRED"}, status = 401)
 
     return wrapper
+
+def input_validator(user_data):
+    try:
+        validate_email(user_data['email'])
+        validate_integer(user_data['phone_number'])
+
+        if not user_data['name'].isalpha():
+            return JsonResponse({"error" : "INVALID_NAME"}, status = 400)
+
+        user_data['nickname'].encode(encoding='utf-8').decode('ascii')
+
+        if not (user_data['nickname'].isalpha() and user_data['nickname'].islower()):
+            return JsonResponse({"error" : "INVALID_NICKNAME"}, status = 400)
+
+        if not re.match(
+            r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_])[A-Za-z\d!@#$%^&*()_]{10,}',
+            user_data['password']
+        ):
+            return JsonResponse({"error" : "INVALID_PASSWORD"}, status = 400)
+
+    except UnicodeDecodeError:
+        return JsonResponse({"error" : "INVALID_NICKNAME"}, status = 400)
+
+    except ValidationError:
+        return JsonResponse({"error" : "INVALID_TYPE"}, status = 400)
+
+    except KeyError:
+        return JsonResponse({"error" : "INVALID_KEYS"}, status = 400)

@@ -18,8 +18,11 @@ class OrderTest(TestCase):
         User.objects.create(
             id           = 1,
             name         = "홍",
-            nickname     = "Dev",
-            password     = bcrypt.hashpw("1234".encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
+            nickname     = "dev",
+            password     = bcrypt.hashpw(
+                "1234567aA!".encode('utf-8'),
+                bcrypt.gensalt()
+            ).decode('utf-8'),
             phone_number = "01012345678",
             email        = "hong@gamil.com",
             gender       = Gender.objects.get(id = 1)
@@ -104,8 +107,8 @@ class OrderDetailTest(TestCase):
         User.objects.create(
             id           = 1,
             name         = "홍",
-            nickname     = "Dev",
-            password     = "1234",
+            nickname     = "dev",
+            password     = "1234567aA!",
             phone_number = "01012345678",
             email        = "hong@gamil.com",
             gender       = Gender.objects.get(id = 1)
@@ -164,9 +167,9 @@ class OrderListTest(TestCase):
 
         User.objects.create(
             id           = 1,
-            name         = "홍1",
-            nickname     = "Dev1",
-            password     = "1234",
+            name         = "홍",
+            nickname     = "dev",
+            password     = "1234567aA!",
             phone_number = "01012345678",
             email        = "hong1@gamil.com",
             gender       = Gender.objects.get(id = 1)
@@ -174,11 +177,11 @@ class OrderListTest(TestCase):
 
         User.objects.create(
             id           = 2,
-            name         = "홍2",
-            nickname     = "Dev2",
-            password     = "1234",
+            name         = "박",
+            nickname     = "devdev",
+            password     = "1234567bB@",
             phone_number = "01012345678",
-            email        = "hong2@gamil.com",
+            email        = "park2@gamil.com",
             gender       = Gender.objects.get(id = 1)
         )
 
@@ -228,7 +231,7 @@ class OrderListTest(TestCase):
                     {
                         "id": 2,
                         "user_id": 1,
-                        "user_name": "홍1",
+                        "user_name": "홍",
                         "user_email": "hong1@gamil.com",
                         "order_number": "MDT30FXBKY5J",
                         "product": "최근 비누",
@@ -237,8 +240,8 @@ class OrderListTest(TestCase):
                     {
                         "id": 3,
                         "user_id": 2,
-                        "user_name": "홍2",
-                        "user_email": "hong2@gamil.com",
+                        "user_name": "박",
+                        "user_email": "park2@gamil.com",
                         "order_number": "T4LV8J9BUE3U",
                         "product": "최근 책갈피",
                         "payment_date": "2018-03-01T00:24:00"
@@ -249,7 +252,7 @@ class OrderListTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_order_list_get_search_name_success(self):
-        response = Client().get('/order/list?name=홍1')
+        response = Client().get('/order/list?name=홍')
 
         self.assertEqual(response.json(),
             {
@@ -257,7 +260,7 @@ class OrderListTest(TestCase):
                     {
                         "id": 2,
                         "user_id": 1,
-                        "user_name": "홍1",
+                        "user_name": "홍",
                         "user_email": "hong1@gamil.com",
                         "order_number": "MDT30FXBKY5J",
                         "product": "최근 비누",
@@ -277,7 +280,7 @@ class OrderListTest(TestCase):
                     {
                         "id": 2,
                         "user_id": 1,
-                        "user_name": "홍1",
+                        "user_name": "홍",
                         "user_email": "hong1@gamil.com",
                         "order_number": "MDT30FXBKY5J",
                         "product": "최근 비누",
