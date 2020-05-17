@@ -4,7 +4,7 @@ import jwt
 
 from project.settings import SECRET_KEY, ALGORITHM
 from .models          import Gender, User
-from .utils           import login_required
+from .utils           import login_required, input_validator
 
 from django.views import View
 from django.http  import HttpResponse, JsonResponse
@@ -17,6 +17,9 @@ class SignUpView(View):
         gender = user_data.get('gender')
 
         try:
+            if input_validator(user_data):
+                return input_validator(user_data)
+
             User.objects.create(
                 name         = user_data['name'],
                 nickname     = user_data['nickname'],
@@ -36,9 +39,6 @@ class SignUpView(View):
 
         except Gender.DoesNotExist:
             return JsonResponse({"error" : "GENDER_DOES_NOT_EXIST"}, status = 400)
-
-        except KeyError:
-            return JsonResponse({"error" : "INVALID_KEYS"}, status = 400)
 
 class SignInView(View):
     def post(self, request):

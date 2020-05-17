@@ -17,8 +17,8 @@ class SignUpTest(TestCase):
         User.objects.create(
             id           = 1,
             name         = "홍홍",
-            nickname     = "DevDev",
-            password     = "1234",
+            nickname     = "devdev",
+            password     = "12345678aA!",
             phone_number = "01012345678",
             email        = "honghong@gamil.com",
             gender       = Gender.objects.get(id = 1)
@@ -27,8 +27,8 @@ class SignUpTest(TestCase):
     def test_sign_up_post_success(self):
         user_data = {
             "name"         : "홍",
-            "nickname"     : "Dev",
-            "password"     : "1234",
+            "nickname"     : "dev",
+            "password"     : "1234567aA!",
             "phone_number" : "01012345678",
             "email"        : "hong@gamil.com",
             "gender"       : "Woman"
@@ -42,8 +42,8 @@ class SignUpTest(TestCase):
     def test_sign_up_post_without_gender_success(self):
         user_data = {
             "name"         : "홍",
-            "nickname"     : "Dev",
-            "password"     : "1234",
+            "nickname"     : "dev",
+            "password"     : "1234567aA!",
             "phone_number" : "01012345678",
             "email"        : "hong@gamil.com",
         }
@@ -56,8 +56,8 @@ class SignUpTest(TestCase):
     def test_sign_up_email_duplicate_fail(self):
         user_data = {
             "name"         : "홍",
-            "nickname"     : "Dev",
-            "password"     : "1234",
+            "nickname"     : "dev",
+            "password"     : "1234567aA!",
             "phone_number" : "01012345678",
             "email"        : "honghong@gamil.com",
             "gender"       : "Woman"
@@ -75,8 +75,8 @@ class SignUpTest(TestCase):
 
     def test_sign_up_name_key_fail(self):
         user_data = {
-            "nickname"     : "Dev",
-            "password"     : "1234",
+            "nickname"     : "dev",
+            "password"     : "1234567aA!",
             "phone_number" : "01012345678",
             "email"        : "hong@gamil.com",
             "gender"       : "Woman"
@@ -95,7 +95,7 @@ class SignUpTest(TestCase):
     def test_sign_up_nick_key_fail(self):
         user_data = {
             "name"         : "홍",
-            "password"     : "1234",
+            "password"     : "1234567aA!",
             "phone_number" : "01012345678",
             "email"        : "hong@gamil.com",
             "gender"       : "Woman"
@@ -114,7 +114,7 @@ class SignUpTest(TestCase):
     def test_sign_up_password_key_fail(self):
         user_data = {
             "name"         : "홍",
-            "nickname"     : "Dev",
+            "nickname"     : "dev",
             "phone_number" : "01012345678",
             "email"        : "hong@gamil.com",
             "gender"       : "Woman"
@@ -133,8 +133,8 @@ class SignUpTest(TestCase):
     def test_sign_up_phone_key_fail(self):
         user_data = {
             "name"         : "홍",
-            "nickname"     : "Dev",
-            "password"     : "1234",
+            "nickname"     : "dev",
+            "password"     : "1234567aA!",
             "email"        : "hong@gamil.com",
             "gender"       : "Woman"
         }
@@ -152,8 +152,8 @@ class SignUpTest(TestCase):
     def test_sign_up_email_key_fail(self):
         user_data = {
             "name"         : "홍",
-            "nickname"     : "Dev",
-            "password"     : "1234",
+            "nickname"     : "dev",
+            "password"     : "1234567aA!",
             "phone_number" : "01012345678",
             "gender"       : "Woman"
         }
@@ -171,8 +171,8 @@ class SignUpTest(TestCase):
     def test_sign_up_gender_fail(self):
         user_data = {
             "name"         : "홍",
-            "nickname"     : "Dev",
-            "password"     : "1234",
+            "nickname"     : "dev",
+            "password"     : "1234567aA!",
             "phone_number" : "01012345678",
             "email"        : "hong@gamil.com",
             "gender"       : "W"
@@ -188,6 +188,286 @@ class SignUpTest(TestCase):
         )
         self.assertEqual(response.status_code, 400)
 
+    def test_sign_up_post_email_type_at_fail(self):
+        user_data = {
+            "name"         : "홍",
+            "nickname"     : "dev",
+            "password"     : "1234567aA!",
+            "phone_number" : "01012345678",
+            "email"        : "honggamil.com",
+            "gender"       : "Woman"
+        }
+        response = Client().post('/user/sign-up',
+                                 json.dumps(user_data),
+                                 content_type = 'application/json')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "INVALID_TYPE"
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_sign_up_post_email_type_dot_fail(self):
+        user_data = {
+            "name"         : "홍",
+            "nickname"     : "dev",
+            "password"     : "1234567aA!",
+            "phone_number" : "01012345678",
+            "email"        : "hong@gamilcom",
+            "gender"       : "Woman"
+        }
+        response = Client().post('/user/sign-up',
+                                 json.dumps(user_data),
+                                 content_type = 'application/json')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "INVALID_TYPE"
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_sign_up_post_phone_type_fail(self):
+        user_data = {
+            "name"         : "홍",
+            "nickname"     : "dev",
+            "password"     : "1234567aA!",
+            "phone_number" : "dd01012345678",
+            "email"        : "hong@gamil.com",
+            "gender"       : "Woman"
+        }
+        response = Client().post('/user/sign-up',
+                                 json.dumps(user_data),
+                                 content_type = 'application/json')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "INVALID_TYPE"
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_sign_up_post_nick_kor_fail(self):
+        user_data = {
+            "name"         : "홍",
+            "nickname"     : "홍",
+            "password"     : "1234567aA!",
+            "phone_number" : "01012345678",
+            "email"        : "hong@gamil.com",
+            "gender"       : "Woman"
+        }
+        response = Client().post('/user/sign-up',
+                                 json.dumps(user_data),
+                                 content_type = 'application/json')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "INVALID_NICKNAME"
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_sign_up_post_nick_capital_fail(self):
+        user_data = {
+            "name"         : "홍",
+            "nickname"     : "DEV",
+            "password"     : "1234567aA!",
+            "phone_number" : "01012345678",
+            "email"        : "hong@gamil.com",
+            "gender"       : "Woman"
+        }
+        response = Client().post('/user/sign-up',
+                                 json.dumps(user_data),
+                                 content_type = 'application/json')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "INVALID_NICKNAME"
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_sign_up_post_nick_num_fail(self):
+        user_data = {
+            "name"         : "홍",
+            "nickname"     : "123",
+            "password"     : "1234567aA!",
+            "phone_number" : "01012345678",
+            "email"        : "hong@gamil.com",
+            "gender"       : "Woman"
+        }
+        response = Client().post('/user/sign-up',
+                                 json.dumps(user_data),
+                                 content_type = 'application/json')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "INVALID_NICKNAME"
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_sign_up_post_nick_special_fail(self):
+        user_data = {
+            "name"         : "홍",
+            "nickname"     : "dev!!",
+            "password"     : "1234567aA!",
+            "phone_number" : "01012345678",
+            "email"        : "hong@gamil.com",
+            "gender"       : "Woman"
+        }
+        response = Client().post('/user/sign-up',
+                                 json.dumps(user_data),
+                                 content_type = 'application/json')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "INVALID_NICKNAME"
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_sign_up_post_pw_capital_fail(self):
+        user_data = {
+            "name"         : "홍",
+            "nickname"     : "dev",
+            "password"     : "12345678a@",
+            "phone_number" : "01012345678",
+            "email"        : "hong@gamil.com",
+            "gender"       : "Woman"
+        }
+        response = Client().post('/user/sign-up',
+                                 json.dumps(user_data),
+                                 content_type = 'application/json')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "INVALID_PASSWORD"
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_sign_up_post_pw_lower_fail(self):
+        user_data = {
+            "name"         : "홍",
+            "nickname"     : "dev",
+            "password"     : "12345678A@",
+            "phone_number" : "01012345678",
+            "email"        : "hong@gamil.com",
+            "gender"       : "Woman"
+        }
+        response = Client().post('/user/sign-up',
+                                 json.dumps(user_data),
+                                 content_type = 'application/json')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "INVALID_PASSWORD"
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_sign_up_post_pw_special_fail(self):
+        user_data = {
+            "name"         : "홍",
+            "nickname"     : "dev",
+            "password"     : "12345678aA",
+            "phone_number" : "01012345678",
+            "email"        : "hong@gamil.com",
+            "gender"       : "Woman"
+        }
+        response = Client().post('/user/sign-up',
+                                 json.dumps(user_data),
+                                 content_type = 'application/json')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "INVALID_PASSWORD"
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_sign_up_post_pw_num_fail(self):
+        user_data = {
+            "name"         : "홍",
+            "nickname"     : "dev",
+            "password"     : "aaaaAAA!@#",
+            "phone_number" : "01012345678",
+            "email"        : "hong@gamil.com",
+            "gender"       : "Woman"
+        }
+        response = Client().post('/user/sign-up',
+                                 json.dumps(user_data),
+                                 content_type = 'application/json')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "INVALID_PASSWORD"
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_sign_up_post_pw_length_fail(self):
+        user_data = {
+            "name"         : "홍",
+            "nickname"     : "dev",
+            "password"     : "123aA@",
+            "phone_number" : "01012345678",
+            "email"        : "hong@gamil.com",
+            "gender"       : "Woman"
+        }
+        response = Client().post('/user/sign-up',
+                                 json.dumps(user_data),
+                                 content_type = 'application/json')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "INVALID_PASSWORD"
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_sign_up_post_name_num_fail(self):
+        user_data = {
+            "name"         : "홍1",
+            "nickname"     : "dev",
+            "password"     : "1234567aA@",
+            "phone_number" : "01012345678",
+            "email"        : "hong@gamil.com",
+            "gender"       : "Woman"
+        }
+        response = Client().post('/user/sign-up',
+                                 json.dumps(user_data),
+                                 content_type = 'application/json')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "INVALID_NAME"
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_sign_up_post_name_special_fail(self):
+        user_data = {
+            "name"         : "홍!!",
+            "nickname"     : "dev",
+            "password"     : "1234567aA@",
+            "phone_number" : "01012345678",
+            "email"        : "hong@gamil.com",
+            "gender"       : "Woman"
+        }
+        response = Client().post('/user/sign-up',
+                                 json.dumps(user_data),
+                                 content_type = 'application/json')
+
+        self.assertEqual(response.json(),
+            {
+                "error" : "INVALID_NAME"
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+
 class SignInTest(TestCase):
     def setUp(self):
         Gender.objects.create(
@@ -197,8 +477,11 @@ class SignInTest(TestCase):
 
         User.objects.create(
             name         = "홍",
-            nickname     = "Dev",
-            password     = bcrypt.hashpw("1234".encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
+            nickname     = "dev",
+            password     = bcrypt.hashpw(
+                "1234567aA!".encode('utf-8'),
+                bcrypt.gensalt()
+            ).decode('utf-8'),
             phone_number = "01012345678",
             email        = "hong@gamil.com",
             gender       = Gender.objects.get(id = 1)
@@ -211,7 +494,7 @@ class SignInTest(TestCase):
     def test_sign_in_post_success(self):
         user_data = {
             "email"    : "hong@gamil.com",
-            "password" : "1234"
+            "password" : "1234567aA!"
         }
         response = Client().post('/user/sign-in',
                                  json.dumps(user_data),
@@ -243,7 +526,7 @@ class SignInTest(TestCase):
     def test_sign_in_post_email_fail(self):
         user_data = {
             "email"    : "dev@gamil.com",
-            "password" : "1234"
+            "password" : "1234567aA!"
         }
         response = Client().post('/user/sign-in',
                                  json.dumps(user_data),
@@ -258,7 +541,7 @@ class SignInTest(TestCase):
 
     def test_sign_in_post_email_key_fail(self):
         user_data = {
-            "password" : "5678"
+            "password" : "1234567aA!"
         }
         response = Client().post('/user/sign-in',
                                  json.dumps(user_data),
@@ -295,8 +578,11 @@ class LogOutTest(TestCase):
 
         User.objects.create(
             name         = "홍",
-            nickname     = "Dev",
-            password     = bcrypt.hashpw("1234".encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
+            nickname     = "dev",
+            password     = bcrypt.hashpw(
+                "1234567aA!".encode('utf-8'),
+                bcrypt.gensalt()
+            ).decode('utf-8'),
             phone_number = "01012345678",
             email        = "hong@gamil.com",
             gender       = Gender.objects.get(id = 1)
@@ -328,9 +614,12 @@ class UserInfoTest(TestCase):
 
         User.objects.create(
             id           = 1,
-            name         = "홍1",
-            nickname     = "Dev1",
-            password     = bcrypt.hashpw("1234".encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
+            name         = "홍홍",
+            nickname     = "devdev",
+            password     = bcrypt.hashpw(
+                "1234567aA!".encode('utf-8'),
+                bcrypt.gensalt()
+            ).decode('utf-8'),
             phone_number = "01012345678",
             email        = "hong1@gamil.com",
             gender       = Gender.objects.get(id = 1)
@@ -338,9 +627,12 @@ class UserInfoTest(TestCase):
 
         User.objects.create(
             id           = 2,
-            name         = "홍2",
-            nickname     = "Dev2",
-            password     = bcrypt.hashpw("1234".encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
+            name         = "홍",
+            nickname     = "dev",
+            password     = bcrypt.hashpw(
+                "1234567bB@".encode('utf-8'),
+                bcrypt.gensalt()
+            ).decode('utf-8'),
             phone_number = "01012345678",
             email        = "hong2@gamil.com",
             gender       = None
@@ -365,8 +657,8 @@ class UserInfoTest(TestCase):
             {
                 "user_info" : {
                     "id"           : 1,
-                    "name"         : "홍1",
-                    "nickname"     : "Dev1",
+                    "name"         : "홍홍",
+                    "nickname"     : "devdev",
                     "phone_number" : "01012345678",
                     "email"        : "hong1@gamil.com",
                     "gender"       : "Woman"
@@ -390,8 +682,8 @@ class UserInfoTest(TestCase):
             {
                 "user_info" : {
                     "id"           : 2,
-                    "name"         : "홍2",
-                    "nickname"     : "Dev2",
+                    "name"         : "홍",
+                    "nickname"     : "dev",
                     "phone_number" : "01012345678",
                     "email"        : "hong2@gamil.com",
                     "gender"       : None
