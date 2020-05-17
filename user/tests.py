@@ -286,6 +286,39 @@ class SignInTest(TestCase):
         )
         self.assertEqual(response.status_code, 400)
 
+class LogOutTest(TestCase):
+    def setUp(self):
+        Gender.objects.create(
+            id     = 1,
+            gender = "Woman"
+        )
+
+        User.objects.create(
+            name         = "홍",
+            nickname     = "Dev",
+            password     = bcrypt.hashpw("1234".encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
+            phone_number = "01012345678",
+            email        = "hong@gamil.com",
+            gender       = Gender.objects.get(id = 1)
+        )
+
+    def tearDown(self):
+        Gender.objects.all().delete()
+        User.objects.all().delete()
+
+    def test_logout_get_success(self):
+        token = jwt.encode(
+            {"email" : "hong@gamil.com"},
+            SECRET_KEY,
+            algorithm = ALGORITHM
+        ).decode('utf-8')
+
+        response = Client().get('/user/log-out',
+                                **{'HTTP_Authorization' : token},
+                                content_type = 'application/json')
+
+        self.assertEqual(response.status_code, 200)
+
 class UserInfoTest(TestCase):
     def setUp(self):
         Gender.objects.create(
