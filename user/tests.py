@@ -505,7 +505,7 @@ class SignInTest(TestCase):
                 "token" : "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImhvbmdAZ2FtaWwuY29tIn0.oWZ_v9icA4Ur_9Gs64ASOJ1rMaW_LCvU6tyG729f1m0"
             }
         )
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 200)
 
     def test_sign_in_post_password_fail(self):
         user_data = {

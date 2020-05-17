@@ -57,7 +57,7 @@ class SignInView(View):
                                        algorithm = ALGORITHM
                                       ).decode('utf-8')
 
-                    return JsonResponse({"token" : token}, status = 201)
+                    return JsonResponse({"token" : token}, status = 200)
 
                 return JsonResponse({"error" : "WRONG_PASSWORD"}, status = 401)
 
