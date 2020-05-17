@@ -81,3 +81,10 @@ use project;
 INSERT INTO genders VALUES (1, 'Woman');
 INSERT INTO genders VALUES (2, 'Man');
 ```
+
+### Docker 사용
+```
+sudo docker pull hongdev22/project:0.1
+
+sudo docker run --name project -d -p 8000:8000 hongdev22/project:0.1
+```
