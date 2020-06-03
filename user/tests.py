@@ -1,11 +1,14 @@
 import json
 import bcrypt
 import jwt
+import string
+import random
 
 from .models          import Gender, User
 from project.settings import SECRET_KEY, ALGORITHM
 
-from django.test import TestCase, Client
+from django.test       import TestCase, Client
+from django.core.cache import cache
 
 class SignUpTest(TestCase):
     def setUp(self):
@@ -500,11 +503,6 @@ class SignInTest(TestCase):
                                  json.dumps(user_data),
                                  content_type = 'application/json')
 
-        self.assertEqual(response.json(),
-            {
-                "token" : "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImhvbmdAZ2FtaWwuY29tIn0.oWZ_v9icA4Ur_9Gs64ASOJ1rMaW_LCvU6tyG729f1m0"
-            }
-        )
         self.assertEqual(response.status_code, 200)
 
     def test_sign_in_post_password_fail(self):
@@ -593,14 +591,19 @@ class LogOutTest(TestCase):
         User.objects.all().delete()
 
     def test_logout_get_success(self):
+        user_number = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                   for x in range(12))
+
         token = jwt.encode(
             {"email" : "hong@gamil.com"},
             SECRET_KEY,
             algorithm = ALGORITHM
         ).decode('utf-8')
 
+        cache.get_or_set(user_number, token)
+
         response = Client().get('/user/log-out',
-                                **{'HTTP_Authorization' : token},
+                                **{'HTTP_Authorization' : user_number},
                                 content_type = 'application/json')
 
         self.assertEqual(response.status_code, 200)
@@ -643,14 +646,19 @@ class UserInfoTest(TestCase):
         User.objects.all().delete()
 
     def test_user_info_get_success(self):
+        user_number = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                   for x in range(12))
+
         token = jwt.encode(
             {"email" : "hong1@gamil.com"},
             SECRET_KEY,
             algorithm = ALGORITHM
         ).decode('utf-8')
 
+        cache.get_or_set(user_number, token)
+
         response = Client().get('/user/info',
-                                **{'HTTP_Authorization' : token},
+                                **{'HTTP_Authorization' : user_number},
                                 content_type = 'application/json')
 
         self.assertEqual(response.json(),
@@ -668,14 +676,19 @@ class UserInfoTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_user_info_get_gender_null_success(self):
+        user_number = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                   for x in range(12))
+
         token = jwt.encode(
             {"email" : "hong2@gamil.com"},
             SECRET_KEY,
             algorithm = ALGORITHM
         ).decode('utf-8')
 
+        cache.get_or_set(user_number, token)
+
         response = Client().get('/user/info',
-                                **{'HTTP_Authorization' : token},
+                                **{'HTTP_Authorization' : user_number},
                                 content_type = 'application/json')
 
         self.assertEqual(response.json(),
@@ -693,14 +706,19 @@ class UserInfoTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_user_info_get_token_fail(self):
+        user_number = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                   for x in range(12))
+
         token = jwt.encode(
-            {"email" : "hong@gamil.com"},
-            "WRONG_SECRET_KEY",
+            {"email" : "hong2@gamil.com"},
+            SECRET_KEY,
             algorithm = ALGORITHM
         ).decode('utf-8')
 
+        cache.get_or_set(user_number, token)
+
         response = Client().get('/user/info',
-                                **{'HTTP_Authorization' : token},
+                                **{'HTTP_Authorization' : 'P1TUCSSWBLZR'},
                                 content_type = 'application/json')
 
         self.assertEqual(response.json(),
@@ -711,14 +729,19 @@ class UserInfoTest(TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_user_info_get_user_fail(self):
+        user_number = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                   for x in range(12))
+
         token = jwt.encode(
-            {"email" : "dev@gamil.com"},
+            {"email" : "hong@gamil.com"},
             SECRET_KEY,
             algorithm = ALGORITHM
         ).decode('utf-8')
 
+        cache.get_or_set(user_number, token)
+
         response = Client().get('/user/info',
-                                **{'HTTP_Authorization' : token},
+                                **{'HTTP_Authorization' : user_number},
                                 content_type = 'application/json')
 
         self.assertEqual(response.json(),

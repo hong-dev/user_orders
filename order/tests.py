@@ -1,12 +1,15 @@
 import json
 import bcrypt
 import jwt
+import string
+import random
 
 from .models          import Order
 from user.models      import Gender, User
 from project.settings import SECRET_KEY, ALGORITHM
 
-from django.test import TestCase, Client
+from django.test       import TestCase, Client
+from django.core.cache import cache
 
 class OrderTest(TestCase):
     def setUp(self):
@@ -33,11 +36,16 @@ class OrderTest(TestCase):
         User.objects.all().delete()
 
     def test_order_post_success(self):
+        user_number = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                   for x in range(12))
+
         token = jwt.encode(
             {"email" : "hong@gamil.com"},
             SECRET_KEY,
             algorithm = ALGORITHM
         ).decode('utf-8')
+
+        cache.get_or_set(user_number, token)
 
         order_data = {
             "product"      : "✅[주말반짝할인]🌙🔮 피니어스 CP 비누💖🐤",
@@ -46,17 +54,22 @@ class OrderTest(TestCase):
 
         response = Client().post('/order',
                                  json.dumps(order_data),
-                                 **{'HTTP_Authorization' : token},
+                                 **{'HTTP_Authorization' : user_number},
                                  content_type = 'application/json')
 
         self.assertEqual(response.status_code, 201)
 
     def test_order_post_payment_key_fail(self):
+        user_number = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                   for x in range(12))
+
         token = jwt.encode(
             {"email" : "hong@gamil.com"},
             SECRET_KEY,
             algorithm = ALGORITHM
         ).decode('utf-8')
+
+        cache.get_or_set(user_number, token)
 
         order_data = {
             "payment_date" : "2020-05-17"
@@ -64,7 +77,7 @@ class OrderTest(TestCase):
 
         response = Client().post('/order',
                                  json.dumps(order_data),
-                                 **{'HTTP_Authorization' : token},
+                                 **{'HTTP_Authorization' : user_number},
                                  content_type = 'application/json')
 
         self.assertEqual(response.json(),
@@ -75,11 +88,16 @@ class OrderTest(TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_order_post_product_key_fail(self):
+        user_number = ''.join(random.choice(string.ascii_uppercase + string.digits)
+                   for x in range(12))
+
         token = jwt.encode(
             {"email" : "hong@gamil.com"},
             SECRET_KEY,
             algorithm = ALGORITHM
         ).decode('utf-8')
+
+        cache.get_or_set(user_number, token)
 
         order_data = {
             "product" : "✅[주말반짝할인]🌙🔮 피니어스 CP 비누💖🐤"
@@ -87,7 +105,7 @@ class OrderTest(TestCase):
 
         response = Client().post('/order',
                                  json.dumps(order_data),
-                                 **{'HTTP_Authorization' : token},
+                                 **{'HTTP_Authorization' : user_number},
                                  content_type = 'application/json')
 
         self.assertEqual(response.json(),
@@ -182,6 +200,16 @@ class OrderListTest(TestCase):
             password     = "1234567bB@",
             phone_number = "01012345678",
             email        = "park2@gamil.com",
+            gender       = Gender.objects.get(id = 1)
+        )
+
+        User.objects.create(
+            id           = 3,
+            name         = "김",
+            nickname     = "devkim",
+            password     = "1234567cC#",
+            phone_number = "01012345678",
+            email        = "kim@gamil.com",
             gender       = Gender.objects.get(id = 1)
         )
 
