@@ -1,5 +1,7 @@
 import jwt
 import re
+import string
+import random
 
 from .models          import User
 from project.settings import SECRET_KEY, ALGORITHM
@@ -7,6 +9,7 @@ from project.settings import SECRET_KEY, ALGORITHM
 from django.http            import JsonResponse
 from django.core.validators import validate_email, validate_integer
 from django.core.exceptions import ValidationError
+from django.core.cache      import cache
 
 def login_required(function):
     def wrapper(self, request, *args, **kwargs):
@@ -14,9 +17,12 @@ def login_required(function):
 
         if token:
             try:
-                decode       = jwt.decode(token, SECRET_KEY, algorithm = ALGORITHM)
-                user         = User.objects.get(email = decode['email'])
-                request.user = user
+                token_cache   = cache.get(token)
+                decode        = jwt.decode(token_cache, SECRET_KEY, algorithm = ALGORITHM)
+                user          = User.objects.get(email = decode['email'])
+
+                request.user  = user
+                request.token = token
 
             except jwt.DecodeError:
                 return JsonResponse({"error" : "INVALID_TOKEN"}, status = 400)
@@ -38,7 +44,7 @@ def input_validator(user_data):
         if not user_data['name'].isalpha():
             return JsonResponse({"error" : "INVALID_NAME"}, status = 400)
 
-        user_data['nickname'].encode(encoding='utf-8').decode('ascii')
+        user_data['nickname'].encode(encoding='ascii')
 
         if not (user_data['nickname'].isalpha() and user_data['nickname'].islower()):
             return JsonResponse({"error" : "INVALID_NICKNAME"}, status = 400)
@@ -49,7 +55,7 @@ def input_validator(user_data):
         ):
             return JsonResponse({"error" : "INVALID_PASSWORD"}, status = 400)
 
-    except UnicodeDecodeError:
+    except UnicodeEncodeError:
         return JsonResponse({"error" : "INVALID_NICKNAME"}, status = 400)
 
     except ValidationError:
@@ -57,3 +63,7 @@ def input_validator(user_data):
 
     except KeyError:
         return JsonResponse({"error" : "INVALID_KEYS"}, status = 400)
+
+def random_number_generator():
+    return ''.join(random.choice(string.ascii_uppercase + string.digits)
+                   for x in range(12))

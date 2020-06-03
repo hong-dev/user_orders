@@ -1,10 +1,8 @@
 import json
-import string
-import random
 
-from .models    import Order
+from .models     import Order
 from user.models import User
-from user.utils import login_required
+from user.utils  import login_required, random_number_generator
 
 from django.views import View
 from django.http  import HttpResponse, JsonResponse
@@ -19,8 +17,7 @@ class OrderView(View):
         try:
             Order.objects.create(
                 user         = user,
-                order_number = ''.join(random.choice(string.ascii_uppercase + string.digits)
-                                       for x in range(12)),
+                order_number = random_number_generator(),
                 product      = order_data['product'],
                 payment_date = order_data['payment_date']
             )
@@ -68,12 +65,12 @@ class OrderListView(View):
             .select_related('user')
         )
 
+        users = User.objects.exclude(order = None)
+
         if name:
-            users = User.objects.filter(name__icontains = name)
+            users = users.filter(name__icontains = name)
         elif email:
-            users = User.objects.filter(email__icontains = email)
-        else:
-            users = User.objects.all()
+            users = users.filter(email__icontains = email)
 
         orders = [
             {

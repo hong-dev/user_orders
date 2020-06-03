@@ -4,11 +4,12 @@ import jwt
 
 from project.settings import SECRET_KEY, ALGORITHM
 from .models          import Gender, User
-from .utils           import login_required, input_validator
+from .utils           import login_required, input_validator, random_number_generator
 
-from django.views import View
-from django.http  import HttpResponse, JsonResponse
-from django.db    import IntegrityError
+from django.views      import View
+from django.http       import HttpResponse, JsonResponse
+from django.db         import IntegrityError
+from django.core.cache import cache
 
 class SignUpView(View):
     def post(self, request):
@@ -57,7 +58,10 @@ class SignInView(View):
                                        algorithm = ALGORITHM
                                       ).decode('utf-8')
 
-                    return JsonResponse({"token" : token}, status = 200)
+                    user_number = random_number_generator()
+                    cache.set(user_number, token)
+
+                    return JsonResponse({"token" : user_number}, status = 200)
 
                 return JsonResponse({"error" : "WRONG_PASSWORD"}, status = 401)
 
@@ -69,7 +73,8 @@ class SignInView(View):
 class LogOutView(View):
     @login_required
     def get(self, request):
-        request.session.flush()
+
+        cache.delete(request.token)
 
         return HttpResponse(status = 200)
 
